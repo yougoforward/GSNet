@@ -6,6 +6,7 @@ from .psp import *
 from .psp_att import *
 from .encnet import *
 from .deeplabv3 import *
+from .deeplabv3_att import *
 from .deeplabv3plus import*
 from .gsnet import *
 from .gsnet_noatt import *
