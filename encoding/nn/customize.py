@@ -19,7 +19,7 @@ from torch.autograd import Variable
 
 torch_ver = torch.__version__[:3]
 
-__all__ = ['SegmentationLosses', 'SegmentationLosses2', 'PyramidPooling', 'JPU', 'JPU_X', 'Mean']
+__all__ = ['SegmentationLosses', 'PyramidPooling', 'JPU', 'JPU_X', 'Mean']
 
 class SegmentationLosses(CrossEntropyLoss):
     """2D Cross Entropy Loss with Auxilary Loss"""
@@ -71,62 +71,6 @@ class SegmentationLosses(CrossEntropyLoss):
             tvect[i] = vect
         return tvect
 
-
-class SegmentationLosses2(CrossEntropyLoss):
-    """2D Cross Entropy Loss with Auxilary Loss"""
-    def __init__(self, se_loss=False, se_weight=0.2, nclass=-1,
-                 aux=False, aux_weight=0.4, weight=None,
-                 size_average=True, ignore_index=-1, reduction='mean'):
-        super(SegmentationLosses2, self).__init__(weight, ignore_index=ignore_index, reduction=reduction)
-        self.ignore_index = ignore_index
-        self.se_loss = se_loss
-        self.aux = aux
-        self.nclass = nclass
-        self.se_weight = se_weight
-        self.aux_weight = aux_weight
-        self.bceloss = BCELoss(weight, reduction=reduction)
-        self.bce = BCEWithLogitsLoss(weight=None, size_average=None, reduce=None, reduction='none', pos_weight=None)
-    def forward(self, *inputs):
-        if not self.se_loss and not self.aux:
-            return super(SegmentationLosses, self).forward(*inputs)
-        elif not self.se_loss:
-            # *preds, target = tuple(inputs)
-            # pred1, pred2, pred3 = tuple(preds[0])
-            pred1, pred2, pred3, target = tuple(inputs)
-            loss1 = super(SegmentationLosses2, self).forward(pred1, target)
-            not_ignore = (target!=self.ignore_index).float().unsqueeze(1)
-            target_cp = target.clone()
-            target_cp[target_cp==self.ignore_index] = 0
-            onehot_label = F.one_hot(target_cp, num_classes =self.nclass).float()
-            loss2 = torch.sum(self.bce(pred2, onehot_label.permute(0,3,1,2))*not_ignore)/torch.sum(not_ignore)
-            loss3 = super(SegmentationLosses2, self).forward(pred3, target)
-            return loss1 + 0.4*loss2 + self.aux_weight * loss3
-        elif not self.aux:
-            pred, se_pred, target = tuple(inputs)
-            se_target = self._get_batch_label_vector(target, nclass=self.nclass).type_as(pred)
-            loss1 = super(SegmentationLosses, self).forward(pred, target)
-            loss2 = self.bceloss(torch.sigmoid(se_pred), se_target)
-            return loss1 + self.se_weight * loss2
-        else:
-            pred1, se_pred, pred2, target = tuple(inputs)
-            se_target = self._get_batch_label_vector(target, nclass=self.nclass).type_as(pred1)
-            loss1 = super(SegmentationLosses, self).forward(pred1, target)
-            loss2 = super(SegmentationLosses, self).forward(pred2, target)
-            loss3 = self.bceloss(torch.sigmoid(se_pred), se_target)
-            return loss1 + self.aux_weight * loss2 + self.se_weight * loss3
-
-    @staticmethod
-    def _get_batch_label_vector(target, nclass):
-        # target is a 3D Variable BxHxW, output is 2D BxnClass
-        batch = target.size(0)
-        tvect = Variable(torch.zeros(batch, nclass))
-        for i in range(batch):
-            hist = torch.histc(target[i].cpu().data.float(), 
-                               bins=nclass, min=0,
-                               max=nclass-1)
-            vect = hist>0
-            tvect[i] = vect
-        return tvect
 
 class Normalize(Module):
     r"""Performs :math:`L_p` normalization of inputs over specified dimension.
