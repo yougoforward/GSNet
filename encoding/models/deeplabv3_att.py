@@ -7,13 +7,13 @@ import torch.nn.functional as F
 from .fcn import FCNHead
 from .base import BaseNet
 
-__all__ = ['DeepLabV3', 'get_deeplabv3']
+__all__ = ['deeplabv3_att', 'get_deeplabv3_att']
 
-class DeepLabV3(BaseNet):
+class deeplabv3_att(BaseNet):
     def __init__(self, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
-        super(DeepLabV3, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
+        super(deeplabv3_att, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
 
-        self.head = DeepLabV3Head(2048, nclass, norm_layer, self._up_kwargs)
+        self.head = deeplabv3_attHead(2048, nclass, norm_layer, self._up_kwargs)
         if aux:
             self.auxlayer = FCNHead(1024, nclass, norm_layer)
 
@@ -33,9 +33,9 @@ class DeepLabV3(BaseNet):
         return tuple(outputs)
 
 
-class DeepLabV3Head(nn.Module):
+class deeplabv3_attHead(nn.Module):
     def __init__(self, in_channels, out_channels, norm_layer, up_kwargs, atrous_rates=(12, 24, 36)):
-        super(DeepLabV3Head, self).__init__()
+        super(deeplabv3_attHead, self).__init__()
         inter_channels = in_channels // 8
         self.aspp = ASPP_Module(in_channels, atrous_rates, norm_layer, up_kwargs)
         # self.block = nn.Sequential(
@@ -46,7 +46,7 @@ class DeepLabV3Head(nn.Module):
         #     nn.Conv2d(inter_channels, out_channels, 1))
         self.block = nn.Sequential(
             nn.Dropout2d(0.1, False),
-            nn.Conv2d(inter_channels, out_channels, 1))
+            nn.Conv2d(2*inter_channels, out_channels, 1))
 
     def forward(self, x):
         x = self.aspp(x)
@@ -81,6 +81,8 @@ class ASPP_Module(nn.Module):
     def __init__(self, in_channels, atrous_rates, norm_layer, up_kwargs):
         super(ASPP_Module, self).__init__()
         out_channels = in_channels // 8
+        inter_channels = 2*out_channels
+
         rate1, rate2, rate3 = tuple(atrous_rates)
         self.b0 = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 1, bias=False),
@@ -97,9 +99,11 @@ class ASPP_Module(nn.Module):
         #     nn.ReLU(True),
         #     nn.Dropout2d(0.5, False))
         self.project = nn.Sequential(
-            nn.Conv2d(5*out_channels, out_channels, 1, bias=False),
-            norm_layer(out_channels),
+            nn.Conv2d(5*out_channels, inter_channels, 1, bias=False),
+            norm_layer(inter_channels),
             nn.ReLU(True))
+
+        self.pam0 = PAM_Module(in_dim=inter_channels, key_dim=inter_channels//8,value_dim=inter_channels,out_dim=inter_channels,norm_layer=norm_layer)
 
     def forward(self, x):
         feat0 = self.b0(x)
@@ -110,15 +114,60 @@ class ASPP_Module(nn.Module):
 
         y = torch.cat((feat0, feat1, feat2, feat3, feat4), 1)
 
-        return self.project(y)
+        return self.pam0(self.project(y))
 
 
-def get_deeplabv3(dataset='pascal_voc', backbone='resnet50', pretrained=False,
+def get_deeplabv3_att(dataset='pascal_voc', backbone='resnet50', pretrained=False,
                 root='~/.encoding/models', **kwargs):
     # infer number of classes
     from ..datasets import datasets
-    model = DeepLabV3(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
+    model = deeplabv3_att(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
     if pretrained:
         raise NotImplementedError
 
     return model
+class PAM_Module(nn.Module):
+    """ Position attention module"""
+    #Ref from SAGAN
+    def __init__(self, in_dim, key_dim, value_dim, out_dim, norm_layer):
+        super(PAM_Module, self).__init__()
+        self.chanel_in = in_dim
+        self.pool = nn.MaxPool2d(kernel_size=2)
+
+        self.query_conv = nn.Conv2d(in_channels=in_dim, out_channels=key_dim, kernel_size=1)
+        self.key_conv = nn.Conv2d(in_channels=in_dim, out_channels=key_dim, kernel_size=1)
+        # self.value_conv = nn.Conv2d(in_channels=value_dim, out_channels=value_dim, kernel_size=1)
+        # self.gamma = nn.Parameter(torch.zeros(1))
+        self.gamma = nn.Sequential(nn.Conv2d(in_channels=in_dim, out_channels=1, kernel_size=1, bias=True), nn.Sigmoid())
+
+        self.softmax = nn.Softmax(dim=-1)
+        # self.fuse_conv = nn.Sequential(nn.Conv2d(value_dim, out_dim, 1, bias=False),
+        #                                norm_layer(out_dim),
+        #                                nn.ReLU(True))
+
+    def forward(self, x):
+        """
+            inputs :
+                x : input feature maps( B X C X H X W)
+            returns :
+                out : attention value + input feature
+                attention: B X (HxW) X (HxW)
+        """
+        xp = self.pool(x)
+        m_batchsize, C, height, width = x.size()
+        m_batchsize, C, hp, wp = xp.size()
+        proj_query = self.query_conv(x).view(m_batchsize, -1, width*height).permute(0, 2, 1)
+        proj_key = self.key_conv(xp).view(m_batchsize, -1, wp*hp)
+        energy = torch.bmm(proj_query, proj_key)
+        attention = self.softmax(energy)
+        # proj_value = self.value_conv(x).view(m_batchsize, -1, width*height)
+        proj_value = xp.view(m_batchsize, -1, wp*hp)
+        
+        out = torch.bmm(proj_value, attention.permute(0, 2, 1))
+        out = out.view(m_batchsize, C, height, width)
+        # out = F.interpolate(out, (height, width), mode="bilinear", align_corners=True)
+
+        gamma = self.gamma(x)
+        out = (1-gamma)*out + gamma*x
+        # out = self.fuse_conv(out)
+        return out

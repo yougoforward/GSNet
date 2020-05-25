@@ -52,7 +52,7 @@ class Trainer():
         # model
         model = get_segmentation_model(args.model, dataset = args.dataset,
                                        backbone = args.backbone, dilated = args.dilated, multi_grid =args.multi_grid,
-                                       stride =args.stride, atrous_rates=args.atrous_rates,
+                                       stride =args.stride, 
                                        lateral = args.lateral, jpu = args.jpu, aux = args.aux,
                                        se_loss = args.se_loss, norm_layer = SyncBatchNorm,
                                        base_size = args.base_size, crop_size = args.crop_size)

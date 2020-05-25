@@ -23,8 +23,7 @@ class Options():
         parser.add_argument('--multi-grid', action='store_true', default=
                             False, help='multigrid dilation')
         parser.add_argument('--stride', type=int, default=8,
-                            help='output stride')
-        parser.add_argument('--atrous-rates', nargs='+', type=int, default=[12, 24, 36], help='atrous rates')             
+                            help='output stride')        
         parser.add_argument('--lateral', action='store_true', default=
                             False, help='employ FPN')
         parser.add_argument('--dataset', type=str, default='ade20k',
