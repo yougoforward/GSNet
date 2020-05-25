@@ -14,7 +14,7 @@ class Blur3Segmentation(BaseDataset):
     ]
     NUM_CLASS = 3
     BASE_DIR = 'blur'
-    def __init__(self, root=os.path.expanduser('../../datasets'), split='train',
+    def __init__(self, root=os.path.expanduser('./datasets'), split='train',
                  mode=None, transform=None, target_transform=None, **kwargs):
         super(Blur3Segmentation, self).__init__(root, split, mode, transform,
                                               target_transform, **kwargs)
