@@ -38,9 +38,9 @@ class SegmentationLosses(CrossEntropyLoss):
         if not self.se_loss and not self.aux:
             return super(SegmentationLosses, self).forward(*inputs)
         elif not self.se_loss:
-            # pred1, pred2, target = tuple(inputs)
-            *preds, target = tuple(inputs)
-            pred1, pred2 = tuple(preds[0])
+            pred1, pred2, target = tuple(inputs)
+            # *preds, target = tuple(inputs)
+            # pred1, pred2 = tuple(preds[0])
             loss1 = super(SegmentationLosses, self).forward(pred1, target)
             loss2 = super(SegmentationLosses, self).forward(pred2, target)
             return loss1 + self.aux_weight * loss2
@@ -90,9 +90,9 @@ class SegmentationLosses2(CrossEntropyLoss):
         if not self.se_loss and not self.aux:
             return super(SegmentationLosses, self).forward(*inputs)
         elif not self.se_loss:
-            *preds, target = tuple(inputs)
-            pred1, pred2, pred3 = tuple(preds[0])
-            # pred1, pred2, pred3, target = tuple(inputs)
+            # *preds, target = tuple(inputs)
+            # pred1, pred2, pred3 = tuple(preds[0])
+            pred1, pred2, pred3, target = tuple(inputs)
             loss1 = super(SegmentationLosses2, self).forward(pred1, target)
             not_ignore = (target!=self.ignore_index).float().unsqueeze(1)
             target_cp = target.clone()
