@@ -15,7 +15,6 @@ def get_segmentation_model(name, **kwargs):
     models = {
         'fcn': get_fcn,
         'encnet': get_encnet,
-        'deeplab': get_deeplab,
         'deeplabv3plus': get_deeplabv3plus,
         'deeplabv3': get_deeplabv3,
         'deeplabv3_att': get_deeplabv3_att,
