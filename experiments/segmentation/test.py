@@ -58,7 +58,7 @@ def test(args):
         model.load_state_dict(checkpoint['state_dict'])
         print("=> loaded checkpoint '{}' (epoch {})".format(args.resume, checkpoint['epoch']))
 
-    print(model)
+    # print(model)
     scales = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25] if args.dataset == 'citys' else \
         [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]
     if not args.ms:
