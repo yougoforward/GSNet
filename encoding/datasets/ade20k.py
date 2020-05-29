@@ -15,7 +15,7 @@ from .base import BaseDataset
 class ADE20KSegmentation(BaseDataset):
     BASE_DIR = 'ADEChallengeData2016'
     NUM_CLASS = 150
-    def __init__(self, root=os.path.expanduser('../../datasets/ade20k'), split='train',
+    def __init__(self, root=os.path.expanduser('./datasets/ade20k'), split='train',
                  mode=None, transform=None, target_transform=None, **kwargs):
         super(ADE20KSegmentation, self).__init__(
             root, split, mode, transform, target_transform, **kwargs)

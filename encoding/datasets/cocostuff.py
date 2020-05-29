@@ -23,7 +23,7 @@ class CocostuffSegmentation(BaseDataset):
     BASE_DIR = 'cocostuff'
     NUM_CLASS = 171
 
-    def __init__(self, root='../../datasets', split='train',
+    def __init__(self, root='./datasets', split='train',
                  mode=None, transform=None, target_transform=None, **kwargs):
         super(CocostuffSegmentation, self).__init__(
             root, split, mode, transform, target_transform, **kwargs)
