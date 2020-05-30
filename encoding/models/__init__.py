@@ -11,6 +11,8 @@ from .deeplabv3plus import*
 from .gsnet import *
 from .gsnet_noatt import *
 from .gsnet_noduide import *
+from .psp_att_noguide import *
+from .deeplabv3_att_noguide import *
 
 def get_segmentation_model(name, **kwargs):
     from .fcn import get_fcn
@@ -25,5 +27,7 @@ def get_segmentation_model(name, **kwargs):
         'gsnet': get_gsnet,
         'gsnet_noatt': get_gsnet_noatt,
         'gsnet_noguide': get_gsnet_noguide,
+        'psp_att_noguide': get_psp_att_noguide,
+        'deeplabv3_att_noguide': get_deeplabv3_att_noguide,
     }
     return models[name.lower()](**kwargs)
