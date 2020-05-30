@@ -7,13 +7,13 @@ import torch.nn.functional as F
 from .fcn import FCNHead
 from .base import BaseNet
 
-__all__ = ['deeplabv3_att', 'get_deeplabv3_att']
+__all__ = ['deeplabv3_att_noguide', 'get_deeplabv3_att_noguide']
 
-class deeplabv3_att(BaseNet):
+class deeplabv3_att_noguide(BaseNet):
     def __init__(self, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
-        super(deeplabv3_att, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
+        super(deeplabv3_att_noguide, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
 
-        self.head = deeplabv3_attHead(2048, nclass, norm_layer, self._up_kwargs)
+        self.head = deeplabv3_att_noguideHead(2048, nclass, norm_layer, self._up_kwargs)
         if aux:
             self.auxlayer = FCNHead(1024, nclass, norm_layer)
 
@@ -33,9 +33,9 @@ class deeplabv3_att(BaseNet):
         return tuple(outputs)
 
 
-class deeplabv3_attHead(nn.Module):
+class deeplabv3_att_noguideHead(nn.Module):
     def __init__(self, in_channels, out_channels, norm_layer, up_kwargs, atrous_rates=(12, 24, 36)):
-        super(deeplabv3_attHead, self).__init__()
+        super(deeplabv3_att_noguideHead, self).__init__()
         inter_channels = in_channels // 8
         self.aspp = ASPP_Module(in_channels, atrous_rates, norm_layer, up_kwargs)
         # self.block = nn.Sequential(
@@ -117,11 +117,11 @@ class ASPP_Module(nn.Module):
         return self.pam0(self.project(y))
 
 
-def get_deeplabv3_att(dataset='pascal_voc', backbone='resnet50', pretrained=False,
+def get_deeplabv3_att_noguide(dataset='pascal_voc', backbone='resnet50', pretrained=False,
                 root='~/.encoding/models', **kwargs):
     # infer number of classes
     from ..datasets import datasets
-    model = deeplabv3_att(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
+    model = deeplabv3_att_noguide(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
     if pretrained:
         raise NotImplementedError
 
