@@ -7,14 +7,14 @@ import torch.nn.functional as F
 from .fcn import FCNHead
 from .base import BaseNet
 
-__all__ = ['gsnet_noatt', 'get_gsnet_noatt']
+__all__ = ['gsnet_noatt_nose_nopsaa', 'get_gsnet_noatt_nose_nopsaa']
 
 
-class gsnet_noatt(BaseNet):
+class gsnet_noatt_nose_nopsaa(BaseNet):
     def __init__(self, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
-        super(gsnet_noatt, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
+        super(gsnet_noatt_nose_nopsaa, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
 
-        self.head = gsnet_noattHead(2048, nclass, norm_layer, se_loss, jpu=kwargs['jpu'], up_kwargs=self._up_kwargs)
+        self.head = gsnet_noatt_nose_nopsaaHead(2048, nclass, norm_layer, se_loss, jpu=kwargs['jpu'], up_kwargs=self._up_kwargs)
         if aux:
             self.auxlayer = FCNHead(1024, nclass, norm_layer)
 
@@ -31,10 +31,10 @@ class gsnet_noatt(BaseNet):
         return tuple(x)
 
 
-class gsnet_noattHead(nn.Module):
+class gsnet_noatt_nose_nopsaaHead(nn.Module):
     def __init__(self, in_channels, out_channels, norm_layer, se_loss, jpu=False, up_kwargs=None,
                  atrous_rates=(12, 24, 36)):
-        super(gsnet_noattHead, self).__init__()
+        super(gsnet_noatt_nose_nopsaaHead, self).__init__()
         self.se_loss = se_loss
         inter_channels = in_channels // 4
 
@@ -139,26 +139,26 @@ class gs_Module(nn.Module):
         n, c, h, w = feat0.size()
         #gp
         gp = self.gap(x)
-        se = self.se(gp)
+        # se = self.se(gp)
         feat4 = gp.expand(n, c, h, w)
-        # psaa
-        y1 = torch.cat((x, feat0, feat1, feat2, feat3, feat4), 1)
-        psaa_att = self.psaa_conv(y1)
-        psaa_att_list = torch.split(psaa_att, 1, dim=1)
+        # # psaa
+        # y1 = torch.cat((x, feat0, feat1, feat2, feat3, feat4), 1)
+        # psaa_att = self.psaa_conv(y1)
+        # psaa_att_list = torch.split(psaa_att, 1, dim=1)
 
-        y2 = torch.cat((psaa_att_list[0] * feat0, psaa_att_list[1] * feat1, psaa_att_list[2] * feat2,
-                        psaa_att_list[3] * feat3, psaa_att_list[4]*feat4), 1)
-
-        out = self.project(y2)
-        out = out+se*out
+        # y2 = torch.cat((psaa_att_list[0] * feat0, psaa_att_list[1] * feat1, psaa_att_list[2] * feat2,
+        #                 psaa_att_list[3] * feat3, psaa_att_list[4]*feat4), 1)
+        y = torch.cat((feat0, feat1, feat2, feat3, feat4), 1)
+        out = self.project(y)
+        # out = out+se*out
         # out = self.pam0(out)
         return out, gp
 
-def get_gsnet_noatt(dataset='pascal_voc', backbone='resnet50', pretrained=False,
+def get_gsnet_noatt_nose_nopsaa(dataset='pascal_voc', backbone='resnet50', pretrained=False,
                  root='~/.encoding/models', **kwargs):
     # infer number of classes
     from ..datasets import datasets
-    model = gsnet_noatt(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
+    model = gsnet_noatt_nose_nopsaa(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
     if pretrained:
         raise NotImplementedError
 
