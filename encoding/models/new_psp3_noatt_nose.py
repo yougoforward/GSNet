@@ -3,7 +3,6 @@ from __future__ import division
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .mask_softmax import Mask_Softmax
 
 from .fcn import FCNHead
 from .base import BaseNet
