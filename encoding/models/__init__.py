@@ -16,6 +16,7 @@ from .deeplabv3_att_noguide import *
 from .gsnet_noatt_nose import *
 from .gsnet_no_att_nose_nopsaa import *
 from .gsnet2 import *
+from .gsnet3 import *
 from .new_psp3 import *
 from .new_psp3_noguide import *
 from .new_psp3_noatt import *
@@ -40,10 +41,12 @@ def get_segmentation_model(name, **kwargs):
         'gsnet_noatt_nose': get_gsnet_noatt_nose,
         'gsnet_noatt_nose_nopsaa':get_gsnet_noatt_nose_nopsaa,
         'gsnet2': get_gsnet2,
+        'gsnet3': get_gsnet3net,
         'new_psp3': get_new_psp3net,
         'new_psp3_noguide': get_new_psp3_noguidenet,
         'new_psp3_noatt': get_new_psp3_noattnet,
         'new_psp3_noatt_nose': get_new_psp3_noatt_nosenet,
         'new_psp3_noatt_nose_nopsaa': get_new_psp3_noatt_nose_nopsaanet,
+
     }
     return models[name.lower()](**kwargs)
