@@ -130,6 +130,9 @@ class gsnet5_Module(nn.Module):
         self.se = nn.Sequential(
                             nn.Conv2d(out_channels, out_channels, 1, bias=True),
                             nn.Sigmoid())
+        self.se2 = nn.Sequential(
+                            nn.Conv2d(out_channels, out_channels, 1, bias=True),
+                            nn.Sigmoid())
 
 
         self.pam0 = PAM_Module(in_dim=out_channels, key_dim=out_channels//8,value_dim=out_channels,out_dim=out_channels,norm_layer=norm_layer)
@@ -152,8 +155,8 @@ class gsnet5_Module(nn.Module):
         out = self.project(y2)
         
         # se
-        # se = self.se(gp)
-        # out = out + se*out
+        se2 = self.se2(gp)
+        out = out + se2*out
 
         #non-local
         out = self.pam0(out)
