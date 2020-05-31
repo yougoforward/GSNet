@@ -136,7 +136,7 @@ class new_psp3_noatt_nose_Module(nn.Module):
 
         # psaa
         y1 = torch.cat((x, feat0, feat1, feat2, feat3), 1)
-        psaa_feat = self.psaa_conv(y1)
+        psaa_att = self.psaa_conv(y1)
         psaa_att_list = torch.split(psaa_att, 1, dim=1)
 
         y2 = torch.cat((psaa_att_list[0] * feat0, psaa_att_list[1] * feat1, psaa_att_list[2] * feat2,
