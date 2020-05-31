@@ -118,7 +118,7 @@ class Options():
                 'pascal_voc': 0.0001,
                 'pascal_aug': 0.001,
                 'pcontext': 0.001,
-                'ade20k': 0.01,
+                'ade20k': 0.004,
                 'cocostuff': 0.001,
             }
             args.lr = lrs[args.dataset.lower()] / 16 * args.batch_size
