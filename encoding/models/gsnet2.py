@@ -175,7 +175,7 @@ class PAM_Module(nn.Module):
         self.query_conv = nn.Conv2d(in_channels=in_dim, out_channels=key_dim, kernel_size=1)
         self.key_conv = nn.Conv2d(in_channels=in_dim, out_channels=key_dim, kernel_size=1)
         # self.value_conv = nn.Conv2d(in_channels=value_dim, out_channels=value_dim, kernel_size=1)
-        # self.gamma = nn.Parameter(torch.zeros(1))
+        self.gamma0 = nn.Parameter(torch.zeros(1))
         self.gamma = nn.Sequential(nn.Conv2d(in_channels=in_dim, out_channels=1, kernel_size=1, bias=True), nn.Sigmoid())
 
         self.softmax = nn.Softmax(dim=-1)
@@ -206,6 +206,6 @@ class PAM_Module(nn.Module):
         # out = F.interpolate(out, (height, width), mode="bilinear", align_corners=True)
 
         gamma = self.gamma(x)
-        out = (1-gamma)*out + gamma*x+x
+        out = (1-gamma)*out + gamma*x+self.gamma0*x
         # out = self.fuse_conv(out)
         return out
