@@ -150,17 +150,13 @@ class gsnet4_Module(nn.Module):
         y2 = torch.cat((psaa_att_list[0]*feat0, psaa_att_list[1] * feat1, psaa_att_list[2] * feat2,
                         psaa_att_list[3] * feat3, gp.expand(n, c, h, w)), 1)
         out = self.project(y2)
-        
-        # se
-        se = self.se(gp)
-        out = out + se*out
 
         #non-local
         out = self.pam0(out)
 
         # se
         se = self.se(gp)
-        # out = out + se*out
+        out = out + se*out
         out = torch.cat([out, gp.expand(n, c, h, w)], dim=1)
         return out, gp
 
