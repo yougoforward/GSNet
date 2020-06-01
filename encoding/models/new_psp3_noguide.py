@@ -142,16 +142,17 @@ class new_psp3_noguide_Module(nn.Module):
         y2 = torch.cat((psaa_att_list[0] * feat0, psaa_att_list[1] * feat1, psaa_att_list[2] * feat2,
                         psaa_att_list[3] * feat3), 1)
         out = self.project(y2)
-        
+
+        #non-local
+        out = self.pam0(out)
+
         #gp
         gp = self.gap(x)
-        
         # se
         se = self.se(gp)
         out = out + se*out
 
-        #non-local
-        out = self.pam0(out)
+
 
         out = torch.cat([out, gp.expand(n, c, h, w)], dim=1)
         return out, gp
