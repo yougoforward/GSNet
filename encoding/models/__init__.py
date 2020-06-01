@@ -22,7 +22,7 @@ from .new_psp3_noguide import *
 from .new_psp3_noatt import *
 from .new_psp3_noatt_nose import *
 from .new_psp3_noatt_nose_nopsaa import *
-from .
+from .new_psp3_nose import *
 
 def get_segmentation_model(name, **kwargs):
     from .fcn import get_fcn
@@ -48,6 +48,7 @@ def get_segmentation_model(name, **kwargs):
         'new_psp3_noatt': get_new_psp3_noattnet,
         'new_psp3_noatt_nose': get_new_psp3_noatt_nosenet,
         'new_psp3_noatt_nose_nopsaa': get_new_psp3_noatt_nose_nopsaanet,
+        'new_psp3_nose': get_new_psp3_nosenet,
 
     }
     return models[name.lower()](**kwargs)
