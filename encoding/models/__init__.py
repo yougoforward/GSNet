@@ -14,7 +14,7 @@ from .gsnet_noduide import *
 from .psp_att_noguide import *
 from .deeplabv3_att_noguide import *
 from .gsnet_noatt_nose import *
-from .gsnet_no_att_nose_nopsaa import *
+from .gsnet_noatt_nose_nopsaa import *
 from .gsnet2 import *
 from .gsnet3 import *
 from .new_psp3 import *
