@@ -97,12 +97,6 @@ class new_psp3_Module(nn.Module):
         self.b1 = new_psp3Conv(in_channels, out_channels, rate1, norm_layer)
         self.b2 = new_psp3Conv(in_channels, out_channels, rate2, norm_layer)
         self.b3 = new_psp3Conv(in_channels, out_channels, rate3, norm_layer)
-        self.b4 = nn.Sequential(
-        nn.Conv2d(in_channels, out_channels, 1, padding=0,
-                  dilation=1, bias=False),
-        norm_layer(out_channels),
-        nn.ReLU(True),
-        PAM_Module(in_dim=out_channels, key_dim=64,value_dim=out_channels,out_dim=out_channels,norm_layer=norm_layer))
 
         self._up_kwargs = up_kwargs
         self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels+4*out_channels, out_channels, 1, padding=0, bias=False),

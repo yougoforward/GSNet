@@ -130,9 +130,6 @@ class gsnet5_Module(nn.Module):
         self.se = nn.Sequential(
                             nn.Conv2d(out_channels, out_channels, 1, bias=True),
                             nn.Sigmoid())
-        self.se2 = nn.Sequential(
-                            nn.Conv2d(out_channels, out_channels, 1, bias=True),
-                            nn.Sigmoid())
 
 
         self.pam0 = PAM_Module(in_dim=out_channels, key_dim=out_channels//8,value_dim=out_channels,out_dim=out_channels,norm_layer=norm_layer)
@@ -153,10 +150,6 @@ class gsnet5_Module(nn.Module):
         y2 = torch.cat((psaa_att_list[0]*feat0, psaa_att_list[1] * feat1, psaa_att_list[2] * feat2,
                         psaa_att_list[3] * feat3, gp2.expand(n, c, h, w)), 1)
         out = self.project(y2)
-        
-        # se
-        se2 = self.se2(gp)
-        out = out + se2*out
 
         #non-local
         out = self.pam0(out)
