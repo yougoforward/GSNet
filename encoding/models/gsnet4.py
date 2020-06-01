@@ -152,15 +152,15 @@ class gsnet4_Module(nn.Module):
         out = self.project(y2)
         
         # se
-        se = self.se(gp)
-        out = out + se*out
+        # se = self.se(gp)
+        # out = out + se*out
 
         #non-local
         out = self.pam0(out)
 
         # se
         se = self.se(gp)
-        # out = out + se*out
+        out = out + se*out
         out = torch.cat([out, gp.expand(n, c, h, w)], dim=1)
         return out, gp
 
