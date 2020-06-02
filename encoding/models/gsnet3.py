@@ -121,8 +121,13 @@ class gsnet3_Module(nn.Module):
                             nn.Conv2d(in_channels, out_channels, 1, bias=False),
                             norm_layer(out_channels),
                             nn.ReLU(True))
-        self.se = nn.Sequential(
-                            nn.Conv2d(out_channels, out_channels, 1, bias=True),
+        # self.se = nn.Sequential(
+        #                     nn.Conv2d(out_channels, out_channels, 1, bias=True),
+        #                     nn.Sigmoid())
+        self.se = nn.Sequential(nn.Conv2d(
+                            out_channels, out_channels//8, 1, bias=True),
+                            nn.ReLU(True),
+                            nn.Conv2d(out_channels//8, out_channels, 1, bias=True),
                             nn.Sigmoid())
 
 
@@ -147,15 +152,15 @@ class gsnet3_Module(nn.Module):
         gp = self.gap(x)
         
         # se
-        # se = self.se(gp)
-        # out = out + se*out
+        se = self.se(gp)
+        out = out + se*out
 
         #non-local
         out = self.pam0(out)
 
         # se
-        se = self.se(gp)
-        out = out + se*out
+        # se = self.se(gp)
+        # out = out + se*out
         out = torch.cat([out, gp.expand(n, c, h, w)], dim=1)
         return out, gp
 
