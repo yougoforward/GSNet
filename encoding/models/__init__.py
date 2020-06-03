@@ -17,6 +17,7 @@ from .gsnet_noatt_nose import *
 from .gsnet_noatt_nose_nopsaa import *
 from .gsnet2 import *
 from .gsnet3 import *
+from .gsnet4 import *
 from .new_psp3 import *
 from .new_psp3_noguide import *
 from .new_psp3_noatt import *
@@ -45,6 +46,7 @@ def get_segmentation_model(name, **kwargs):
         'gsnet_noatt_nose_nopsaa':get_gsnet_noatt_nose_nopsaa,
         'gsnet2': get_gsnet2,
         'gsnet3': get_gsnet3net,
+        'gsnet4': get_gsnet4net,
         'new_psp3': get_new_psp3net,
         'new_psp3_noguide': get_new_psp3_noguidenet,
         'new_psp3_noatt': get_new_psp3_noattnet,
