@@ -31,11 +31,12 @@ from .new_psp3_aspp_base_psaa_att import *
 from .new_psp3_nopsaa import *
 from .new_psp3_nose_nopsaa import *
 from .new_psp3_noatt_nopsaa import *
-
+from .fcn_att import *
 def get_segmentation_model(name, **kwargs):
     from .fcn import get_fcn
     models = {
         'fcn': get_fcn,
+        'fcn_att': get_fcn_att,
         'encnet': get_encnet,
         'deeplabv3plus': get_deeplabv3plus,
         'deeplabv3': get_deeplabv3,

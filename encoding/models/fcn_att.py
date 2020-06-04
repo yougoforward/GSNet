@@ -12,9 +12,9 @@ from torch.nn.functional import interpolate
 
 from .base import BaseNet
 
-__all__ = ['FCN', 'get_fcn', 'get_fcn_resnet50_pcontext', 'get_fcn_resnet50_ade']
+__all__ = ['fcn_att', 'get_fcn_att', 'get_fcn_att_resnet50_pcontext', 'get_fcn_att_resnet50_ade']
 
-class FCN(BaseNet):
+class fcn_att(BaseNet):
     r"""Fully Convolutional Networks for Semantic Segmentation
 
     Parameters
@@ -35,14 +35,14 @@ class FCN(BaseNet):
 
     Examples
     --------
-    >>> model = FCN(nclass=21, backbone='resnet50')
+    >>> model = fcn_att(nclass=21, backbone='resnet50')
     >>> print(model)
     """
     def __init__(self, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
-        super(FCN, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
-        self.head = FCNHead(2048, nclass, norm_layer)
+        super(fcn_att, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
+        self.head = fcn_attHead(2048, nclass, norm_layer)
         if aux:
-            self.auxlayer = FCNHead(1024, nclass, norm_layer)
+            self.auxlayer = fcn_attHead(1024, nclass, norm_layer)
 
     def forward(self, x):
         imsize = x.size()[2:]
@@ -58,9 +58,9 @@ class FCN(BaseNet):
         return tuple(outputs)
 
         
-class FCNHead(nn.Module):
+class fcn_attHead(nn.Module):
     def __init__(self, in_channels, out_channels, norm_layer):
-        super(FCNHead, self).__init__()
+        super(fcn_attHead, self).__init__()
         inter_channels = in_channels // 4
         self.conv5 = nn.Sequential(nn.Conv2d(in_channels, inter_channels, 3, padding=1, bias=False),
                                    norm_layer(inter_channels),
@@ -75,10 +75,10 @@ class FCNHead(nn.Module):
         return self.conv8(self.pam0(self.conv5(x)))
 
 
-def get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False,
+def get_fcn_att(dataset='pascal_voc', backbone='resnet50', pretrained=False,
             root='~/.encoding/models', **kwargs):
-    r"""FCN model from the paper `"Fully Convolutional Network for semantic segmentation"
-    <https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf>`_
+    r"""fcn_att model from the paper `"Fully Convolutional Network for semantic segmentation"
+    <https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn_att.pdf>`_
     Parameters
     ----------
     dataset : str, default pascal_voc
@@ -89,7 +89,7 @@ def get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         Location for keeping the model parameters.
     Examples
     --------
-    >>> model = get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False)
+    >>> model = get_fcn_att(dataset='pascal_voc', backbone='resnet50', pretrained=False)
     >>> print(model)
     """
     acronyms = {
@@ -100,14 +100,14 @@ def get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False,
     }
     # infer number of classes
     from ..datasets import datasets
-    model = FCN(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
+    model = fcn_att(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
     if pretrained:
         from .model_store import get_model_file
         model.load_state_dict(torch.load(
-            get_model_file('fcn_%s_%s'%(backbone, acronyms[dataset]), root=root)))
+            get_model_file('fcn_att_%s_%s'%(backbone, acronyms[dataset]), root=root)))
     return model
 
-def get_fcn_resnet50_pcontext(pretrained=False, root='~/.encoding/models', **kwargs):
+def get_fcn_att_resnet50_pcontext(pretrained=False, root='~/.encoding/models', **kwargs):
     r"""EncNet-PSP model from the paper `"Context Encoding for Semantic Segmentation"
     <https://arxiv.org/pdf/1803.08904.pdf>`_
 
@@ -121,12 +121,12 @@ def get_fcn_resnet50_pcontext(pretrained=False, root='~/.encoding/models', **kwa
 
     Examples
     --------
-    >>> model = get_fcn_resnet50_pcontext(pretrained=True)
+    >>> model = get_fcn_att_resnet50_pcontext(pretrained=True)
     >>> print(model)
     """
-    return get_fcn('pcontext', 'resnet50', pretrained, root=root, aux=False, **kwargs)
+    return get_fcn_att('pcontext', 'resnet50', pretrained, root=root, aux=False, **kwargs)
 
-def get_fcn_resnet50_ade(pretrained=False, root='~/.encoding/models', **kwargs):
+def get_fcn_att_resnet50_ade(pretrained=False, root='~/.encoding/models', **kwargs):
     r"""EncNet-PSP model from the paper `"Context Encoding for Semantic Segmentation"
     <https://arxiv.org/pdf/1803.08904.pdf>`_
 
@@ -140,10 +140,10 @@ def get_fcn_resnet50_ade(pretrained=False, root='~/.encoding/models', **kwargs):
 
     Examples
     --------
-    >>> model = get_fcn_resnet50_ade(pretrained=True)
+    >>> model = get_fcn_att_resnet50_ade(pretrained=True)
     >>> print(model)
     """
-    return get_fcn('ade20k', 'resnet50', pretrained, root=root, **kwargs)
+    return get_fcn_att('ade20k', 'resnet50', pretrained, root=root, **kwargs)
 class PAM_Module(nn.Module):
     """ Position attention module"""
     #Ref from SAGAN
