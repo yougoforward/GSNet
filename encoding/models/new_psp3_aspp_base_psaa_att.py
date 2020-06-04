@@ -136,7 +136,7 @@ class new_psp3_aspp_base_psaa_att_Module(nn.Module):
         psaa_att_list = torch.split(psaa_att, 1, dim=1)
 
         y2 = torch.cat((psaa_att_list[0] * feat0, psaa_att_list[1] * feat1, psaa_att_list[2] * feat2,
-                        psaa_att_list[3] * feat3), 1)
+                        psaa_att_list[3] * feat3, feat4), 1)
         # y2 = torch.cat((feat0, feat1, feat2, feat3, feat4), 1)
         out = self.project(y2)
         
