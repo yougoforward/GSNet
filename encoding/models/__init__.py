@@ -32,6 +32,8 @@ from .new_psp3_nopsaa import *
 from .new_psp3_nose_nopsaa import *
 from .new_psp3_noatt_nopsaa import *
 from .fcn_att import *
+from .gsnet_nose import *
+from .new_psp3_nopsaa_nose_nogp import *
 def get_segmentation_model(name, **kwargs):
     from .fcn import get_fcn
     models = {
@@ -66,6 +68,8 @@ def get_segmentation_model(name, **kwargs):
         'new_psp3_nopsaa': get_new_psp3_nopsaanet,
         'new_psp3_nose_nopsaa': get_new_psp3_nose_nopsaanet,
         'new_psp3_noatt_nopsaa': get_new_psp3_noatt_nopsaanet,
+        'gsnet_nose': get_gsnet_nose,
+        'new_psp3_nopsaa_nose_nogp': get_new_psp3_nopsaa_nose_nogpnet,
 
     }
     return models[name.lower()](**kwargs)
