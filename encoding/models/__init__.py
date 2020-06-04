@@ -17,6 +17,7 @@ from .gsnet_noatt_nose import *
 from .gsnet_noatt_nose_nopsaa import *
 from .gsnet2 import *
 from .gsnet3 import *
+from .gsnet4 import *
 from .new_psp3 import *
 from .new_psp3_noguide import *
 from .new_psp3_noatt import *
@@ -24,9 +25,13 @@ from .new_psp3_noatt_nose import *
 from .new_psp3_noatt_nose_nopsaa import *
 from .new_psp3_nose import *
 from .new_psp3_aspp_base import *
+<<<<<<< HEAD
 from .new_psp3_aspp_base_att import *
 from .new_psp3_nopsaa import *
 from .new_psp3_nose_nopsaa import *
+=======
+from .new_psp3_noatt_nopsaa import *
+>>>>>>> 467192621ebacf59f27699ead52a0124819c721e
 
 def get_segmentation_model(name, **kwargs):
     from .fcn import get_fcn
@@ -47,6 +52,7 @@ def get_segmentation_model(name, **kwargs):
         'gsnet_noatt_nose_nopsaa':get_gsnet_noatt_nose_nopsaa,
         'gsnet2': get_gsnet2,
         'gsnet3': get_gsnet3net,
+        'gsnet4': get_gsnet4net,
         'new_psp3': get_new_psp3net,
         'new_psp3_noguide': get_new_psp3_noguidenet,
         'new_psp3_noatt': get_new_psp3_noattnet,
@@ -54,9 +60,13 @@ def get_segmentation_model(name, **kwargs):
         'new_psp3_noatt_nose_nopsaa': get_new_psp3_noatt_nose_nopsaanet,
         'new_psp3_nose': get_new_psp3_nosenet,
         'new_psp3_aspp_base': get_new_psp3_aspp_basenet,
+<<<<<<< HEAD
         'new_psp3_aspp_base_att': get_new_psp3_aspp_base_attnet,
         'new_psp3_nopsaa': get_new_psp3_nopsaanet,
         'new_psp3__nose_nopsaa': get_new_psp3_nose_nopsaanet,
+=======
+        'new_psp3_noatt_nopsaa': get_new_psp3_noatt_nopsaanet,
+>>>>>>> 467192621ebacf59f27699ead52a0124819c721e
 
     }
     return models[name.lower()](**kwargs)
