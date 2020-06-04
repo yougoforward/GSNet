@@ -12,5 +12,5 @@ python -m experiments.segmentation.test --dataset pcontext \
 #test [multi-scale]
 python -m experiments.segmentation.test --dataset pcontext \
     --model fcn_att --aux --dilated --base-size 520 --crop-size 520 \
-    --backbone resnet101 --resume experiments/segmentation/runs/pcontext/fcn_att/fcn_att_res101_pcontext/model_best.pth.tar --split val --mode testval --msgit pull
+    --backbone resnet101 --resume experiments/segmentation/runs/pcontext/fcn_att/fcn_att_res101_pcontext/model_best.pth.tar --split val --mode testval --ms
     
