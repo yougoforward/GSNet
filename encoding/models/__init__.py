@@ -36,6 +36,7 @@ from .gsnet_nose import *
 from .new_psp3_nopsaa_nose_nogp import *
 from .gsnet6 import *
 from .gsnet7 import *
+from .gsnet7_nose import *
 def get_segmentation_model(name, **kwargs):
     from .fcn import get_fcn
     models = {
@@ -74,5 +75,6 @@ def get_segmentation_model(name, **kwargs):
         'new_psp3_nopsaa_nose_nogp': get_new_psp3_nopsaa_nose_nogpnet,
         'gsnet6': get_gsnet6net,
         'gsnet7': get_gsnet7net,
+        'gsnet7_nose': get_gsnet7_nosenet,
     }
     return models[name.lower()](**kwargs)
