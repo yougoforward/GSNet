@@ -105,13 +105,10 @@ class gs_Module(nn.Module):
         PAM_Module(in_dim=out_channels, key_dim=64,value_dim=out_channels,out_dim=out_channels,norm_layer=norm_layer))
 
         self._up_kwargs = up_kwargs
-        # self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels+5*out_channels, out_channels, 1, padding=0, bias=False),
-        #                             norm_layer(out_channels),
-        #                             nn.ReLU(True),
-        #                             nn.Conv2d(out_channels, 4, 1, bias=True),
-        #                             nn.Sigmoid())  
-        self.psaa_conv = nn.Sequential(
-                                    nn.Conv2d(in_channels+5*out_channels, 4, 1, bias=True),
+        self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels+5*out_channels, out_channels, 1, padding=0, bias=False),
+                                    norm_layer(out_channels),
+                                    nn.ReLU(True),
+                                    nn.Conv2d(out_channels, 5, 1, bias=True),
                                     nn.Sigmoid())  
         self.project = nn.Sequential(nn.Conv2d(in_channels=5*out_channels, out_channels=out_channels,
                       kernel_size=1, stride=1, padding=0, bias=False),
@@ -141,7 +138,7 @@ class gs_Module(nn.Module):
         n, c, h, w = feat0.size()
         #gp
         gp = self.gap(x)
-        se = self.se(gp)
+        # se = self.se(gp)
         feat4 = F.interpolate(gp, (h,w), **self._up_kwargs)
         # feat4 = gp.expand(n, c, h, w)
         # psaa
@@ -149,12 +146,12 @@ class gs_Module(nn.Module):
         psaa_att = self.psaa_conv(y1)
         psaa_att_list = torch.split(psaa_att, 1, dim=1)
 
-        y2 = torch.cat((feat0, psaa_att_list[0] * feat1, psaa_att_list[1] * feat2,
-                        psaa_att_list[2] * feat3, psaa_att_list[3]*feat4), 1)
+        y2 = torch.cat((psaa_att_list[0]*feat0, psaa_att_list[1] * feat1, psaa_att_list[2] * feat2,
+                        psaa_att_list[3] * feat3, psaa_att_list[4]*feat4), 1)
 
         out = self.project(y2)
-        out = out + se*out
-        out = self.pam0(out)
+        # out = out + se*out
+        # out = self.pam0(out)
         return out, gp
 
 def get_gsnet2(dataset='pascal_voc', backbone='resnet50', pretrained=False,
