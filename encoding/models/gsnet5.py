@@ -99,10 +99,10 @@ class gsnet5_Module(nn.Module):
         self.b3 = gsnet5Conv(in_channels, out_channels, rate3, norm_layer)
 
         self._up_kwargs = up_kwargs
-        self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels+4*out_channels, out_channels//2, 1, padding=0, bias=False),
-                                    norm_layer(out_channels//2),
+        self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels+4*out_channels, out_channels, 1, padding=0, bias=False),
+                                    norm_layer(out_channels),
                                     nn.ReLU(True),
-                                    nn.Conv2d(out_channels//2, 4, 1, bias=True),
+                                    nn.Conv2d(out_channels, 4, 1, bias=True),
                                     nn.Sigmoid())  
         # self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels, out_channels//2, 1, padding=0, bias=False),
         #                             norm_layer(out_channels//2),
