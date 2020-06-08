@@ -119,7 +119,7 @@ class gsnet8_Module(nn.Module):
                             nn.Conv2d(in_channels, out_channels, 1, bias=False),
                             norm_layer(out_channels),
                             nn.ReLU(True))
-        self.sem_gp = nn.Sequential(nn.Conv2d(in_channels, out_channels//2, 1, bias=False),
+        self.sem_gp = nn.Sequential(nn.Conv2d(out_channels, out_channels//2, 1, bias=False),
                             norm_layer(out_channels//2),
                             nn.ReLU(True))
         self.se = nn.Sequential(nn.Conv2d(out_channels, out_channels//16, 1, bias=True),
