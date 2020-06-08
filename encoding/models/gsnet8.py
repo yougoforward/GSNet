@@ -124,7 +124,7 @@ class gsnet8_Module(nn.Module):
                             nn.ReLU(True))
         self.se = nn.Sequential(nn.Conv2d(out_channels, out_channels//16, 1, bias=True),
                             norm_layer(out_channels//16),
-                            nn.ReLU(True)
+                            nn.ReLU(True),
                             nn.Conv2d(out_channels//16, out_channels, 1, bias=True),
                             nn.Sigmoid())
 
