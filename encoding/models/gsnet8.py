@@ -156,7 +156,7 @@ class gsnet8_Module(nn.Module):
         #non-local
         out = self.pam0(out)
 
-        out = torch.cat([out, self.sem_gp(gp).expand(n, c, h, w)], dim=1)
+        out = torch.cat([out, self.sem_gp(gp).expand(n, c//2, h, w)], dim=1)
         return out, gp
 
 def get_gsnet8net(dataset='pascal_voc', backbone='resnet50', pretrained=False,

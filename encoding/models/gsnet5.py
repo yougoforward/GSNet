@@ -39,7 +39,7 @@ class gsnet5NetHead(nn.Module):
         inter_channels = in_channels // 4
 
         self.aa_gsnet5 = gsnet5_Module(in_channels, inter_channels, atrous_rates, norm_layer, up_kwargs)
-        self.conv8 = nn.Sequential(nn.Dropout2d(0.1), nn.Conv2d(2*inter_channels, out_channels, 1))
+        self.conv8 = nn.Sequential(nn.Dropout2d(0.1), nn.Conv2d(inter_channels+inter_channels//2, out_channels, 1))
         if self.se_loss:
             self.selayer = nn.Linear(inter_channels, out_channels)
 
@@ -97,21 +97,19 @@ class gsnet5_Module(nn.Module):
         self.b1 = gsnet5Conv(in_channels, out_channels, rate1, norm_layer)
         self.b2 = gsnet5Conv(in_channels, out_channels, rate2, norm_layer)
         self.b3 = gsnet5Conv(in_channels, out_channels, rate3, norm_layer)
-        self.b4 = nn.Sequential(
-        nn.Conv2d(in_channels, out_channels, 1, padding=0,
-                  dilation=1, bias=False),
-        norm_layer(out_channels),
-        nn.ReLU(True),
-        PAM_Module(in_dim=out_channels, key_dim=64,value_dim=out_channels,out_dim=out_channels,norm_layer=norm_layer))
 
         self._up_kwargs = up_kwargs
-        self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels+4*out_channels, out_channels, 1, padding=0, bias=False),
-                                    norm_layer(out_channels),
+        self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels+4*out_channels, out_channels//2, 1, padding=0, bias=False),
+                                    norm_layer(out_channels//2),
                                     nn.ReLU(True),
-                                    nn.Conv2d(out_channels, 4, 1, bias=True),
+                                    nn.Conv2d(out_channels//2, 4, 1, bias=True),
                                     nn.Sigmoid())  
-
-        self.project = nn.Sequential(nn.Conv2d(in_channels=5*out_channels, out_channels=out_channels,
+        # self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels, out_channels//2, 1, padding=0, bias=False),
+        #                             norm_layer(out_channels//2),
+        #                             nn.ReLU(True),
+        #                             nn.Conv2d(out_channels//2, 4, 1, bias=True),
+        #                             nn.Sigmoid())  
+        self.project = nn.Sequential(nn.Conv2d(in_channels=4*out_channels, out_channels=out_channels,
                       kernel_size=1, stride=1, padding=0, bias=False),
                       norm_layer(out_channels),
                       nn.ReLU(True))
@@ -121,12 +119,9 @@ class gsnet5_Module(nn.Module):
                             nn.Conv2d(in_channels, out_channels, 1, bias=False),
                             norm_layer(out_channels),
                             nn.ReLU(True))
-
-        self.gap2 = nn.Sequential(nn.AdaptiveAvgPool2d(1),
-                            nn.Conv2d(in_channels, out_channels, 1, bias=False),
-                            norm_layer(out_channels),
+        self.sem_gp = nn.Sequential(nn.Conv2d(out_channels, out_channels//2, 1, bias=False),
+                            norm_layer(out_channels//2),
                             nn.ReLU(True))
-
         self.se = nn.Sequential(
                             nn.Conv2d(out_channels, out_channels, 1, bias=True),
                             nn.Sigmoid())
@@ -139,25 +134,27 @@ class gsnet5_Module(nn.Module):
         feat2 = self.b2(x)
         feat3 = self.b3(x)
         n, c, h, w = feat0.size()
-        #gp
-        gp = self.gap(x)
-        gp2 =self.gap2(x)
+
         # psaa
         y1 = torch.cat((x, feat0, feat1, feat2, feat3), 1)
         psaa_att = self.psaa_conv(y1)
+        # psaa_att = self.psaa_conv(x)
         psaa_att_list = torch.split(psaa_att, 1, dim=1)
 
-        y2 = torch.cat((psaa_att_list[0]*feat0, psaa_att_list[1] * feat1, psaa_att_list[2] * feat2,
-                        psaa_att_list[3] * feat3, gp2.expand(n, c, h, w)), 1)
+        y2 = torch.cat((psaa_att_list[0] * feat0, psaa_att_list[1] * feat1, psaa_att_list[2] * feat2,
+                        psaa_att_list[3] * feat3), 1)
         out = self.project(y2)
-
-        #non-local
-        out = self.pam0(out)
-
+        
+        #gp
+        gp = self.gap(x)
+        # feat4 = gp.expand(n, c, h, w)
         # se
         se = self.se(gp)
         out = out + se*out
-        out = torch.cat([out, gp.expand(n, c, h, w)], dim=1)
+        #non-local
+        out = self.pam0(out)
+
+        out = torch.cat([out, self.sem_gp(gp).expand(n, c//2, h, w)], dim=1)
         return out, gp
 
 def get_gsnet5net(dataset='pascal_voc', backbone='resnet50', pretrained=False,
