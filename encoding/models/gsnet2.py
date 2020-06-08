@@ -151,8 +151,8 @@ class gs_Module(nn.Module):
 
         out = self.project(y2)
         # out = out + se*out
-        # out = self.pam0(out)git pull
-        
+        # out = self.pam0(out)
+
         return out, gp
 
 def get_gsnet2(dataset='pascal_voc', backbone='resnet50', pretrained=False,
