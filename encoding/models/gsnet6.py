@@ -99,16 +99,16 @@ class gsnet6_Module(nn.Module):
         self.b3 = gsnet6Conv(in_channels, out_channels, rate3, norm_layer)
 
         self._up_kwargs = up_kwargs
-        # self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels+4*out_channels, out_channels, 1, padding=0, bias=False),
-        #                             norm_layer(out_channels),
-        #                             nn.ReLU(True),
-        #                             nn.Conv2d(out_channels, 4, 1, bias=True),
-        #                             nn.Sigmoid())  
-        self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels, out_channels//2, 1, padding=0, bias=False),
-                                    norm_layer(out_channels//2),
+        self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels+4*out_channels, out_channels, 1, padding=0, bias=False),
+                                    norm_layer(out_channels),
                                     nn.ReLU(True),
-                                    nn.Conv2d(out_channels//2, 4, 1, bias=True),
+                                    nn.Conv2d(out_channels, 4, 1, bias=True),
                                     nn.Sigmoid())  
+        # self.psaa_conv = nn.Sequential(nn.Conv2d(in_channels, out_channels//2, 1, padding=0, bias=False),
+        #                             norm_layer(out_channels//2),
+        #                             nn.ReLU(True),
+        #                             nn.Conv2d(out_channels//2, 4, 1, bias=True),
+        #                             nn.Sigmoid())  
         self.project = nn.Sequential(nn.Conv2d(in_channels=4*out_channels, out_channels=out_channels,
                       kernel_size=1, stride=1, padding=0, bias=False),
                       norm_layer(out_channels),
@@ -136,9 +136,9 @@ class gsnet6_Module(nn.Module):
         n, c, h, w = feat0.size()
 
         # psaa
-        # y1 = torch.cat((x, feat0, feat1, feat2, feat3), 1)
-        # psaa_att = self.psaa_conv(y1)
-        psaa_att = self.psaa_conv(x)
+        y1 = torch.cat((x, feat0, feat1, feat2, feat3), 1)
+        psaa_att = self.psaa_conv(y1)
+        # psaa_att = self.psaa_conv(x)
         psaa_att_list = torch.split(psaa_att, 1, dim=1)
 
         y2 = torch.cat((psaa_att_list[0] * feat0, psaa_att_list[1] * feat1, psaa_att_list[2] * feat2,
