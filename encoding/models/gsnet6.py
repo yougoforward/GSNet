@@ -114,7 +114,7 @@ class gsnet6_Module(nn.Module):
                       norm_layer(out_channels),
                       nn.ReLU(True))
 
-        self.gp = nn.Sequential(nn.AdaptiveAvgPool2d(1)
+        self.gp = nn.Sequential(nn.AdaptiveAvgPool2d(1),
                             nn.Conv2d(in_channels, out_channels, 1, bias=False),
                             norm_layer(out_channels),
                             nn.ReLU(True))
