@@ -157,8 +157,8 @@ class gsnet8_Module(nn.Module):
         gap = self.gap(gp)
         # feat4 = gp.expand(n, c, h, w)
         # se
-        se = self.se(gp)
-        out = out + se*out
+        # se = self.se(gp)
+        # out = out + se*out
         #non-local
         out = self.pam0(out)
 
