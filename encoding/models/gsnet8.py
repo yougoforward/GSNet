@@ -109,11 +109,10 @@ class gsnet8_Module(nn.Module):
                                     nn.ReLU(True),
                                     nn.Conv2d(out_channels//2, 4, 1, bias=True),
                                     nn.Sigmoid())  
-        # self.project = nn.Sequential(nn.Conv2d(in_channels=4*out_channels, out_channels=out_channels,
-        #               kernel_size=1, stride=1, padding=0, bias=False),
-        #               norm_layer(out_channels),
-        #               nn.ReLU(True))
-
+        self.project = nn.Sequential(nn.Conv2d(in_channels=4*out_channels, out_channels=out_channels,
+                      kernel_size=1, stride=1, padding=0, bias=False),
+                      norm_layer(out_channels),
+                      nn.ReLU(True))
 
         self.gp = nn.Sequential(nn.AdaptiveAvgPool2d(1),
                             nn.Conv2d(in_channels, out_channels, 1, bias=False),
