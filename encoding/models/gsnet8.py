@@ -39,7 +39,7 @@ class gsnet8NetHead(nn.Module):
         inter_channels = in_channels // 4
 
         self.aa_gsnet8 = gsnet8_Module(in_channels, inter_channels, atrous_rates, norm_layer, up_kwargs)
-        self.conv8 = nn.Sequential(nn.Dropout2d(0.1), nn.Conv2d(inter_channels+inter_channels, out_channels, 1))
+        self.conv8 = nn.Sequential(nn.Dropout2d(0.1), nn.Conv2d(inter_channels+inter_channels//2, out_channels, 1))
         if self.se_loss:
             self.selayer = nn.Linear(inter_channels, out_channels)
 
@@ -118,9 +118,9 @@ class gsnet8_Module(nn.Module):
                             nn.Conv2d(in_channels, out_channels, 1, bias=False),
                             norm_layer(out_channels),
                             nn.ReLU(True))
-        # self.sem_gp = nn.Sequential(nn.Conv2d(out_channels, out_channels//2, 1, bias=False),
-        #                     norm_layer(out_channels//2),
-        #                     nn.ReLU(True))
+        self.sem_gp = nn.Sequential(nn.Conv2d(out_channels, out_channels//2, 1, bias=False),
+                            norm_layer(out_channels//2),
+                            nn.ReLU(True))
         # self.se = nn.Sequential(
         #                     nn.Conv2d(out_channels, out_channels, 1, bias=True),
         #                     nn.Sigmoid())
@@ -159,7 +159,7 @@ class gsnet8_Module(nn.Module):
         #non-local
         out = self.pam0(out)
 
-        out = torch.cat([out, gp.expand(n, c, h, w)], dim=1)
+        out = torch.cat([out, self.sem_gp(gp).expand(n, c, h, w)], dim=1)
         return out, gp
 
 def get_gsnet8net(dataset='pascal_voc', backbone='resnet50', pretrained=False,
