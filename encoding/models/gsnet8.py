@@ -118,9 +118,9 @@ class gsnet8_Module(nn.Module):
                             nn.Conv2d(in_channels, out_channels, 1, bias=False),
                             norm_layer(out_channels),
                             nn.ReLU(True))
-        self.sem_gp = nn.Sequential(nn.Conv2d(out_channels, out_channels//2, 1, bias=False),
-                            norm_layer(out_channels//2),
-                            nn.ReLU(True))
+        # self.sem_gp = nn.Sequential(nn.Conv2d(out_channels, out_channels//2, 1, bias=False),
+        #                     norm_layer(out_channels//2),
+        #                     nn.ReLU(True))
         # self.se = nn.Sequential(
         #                     nn.Conv2d(out_channels, out_channels, 1, bias=True),
         #                     nn.Sigmoid())
@@ -159,7 +159,7 @@ class gsnet8_Module(nn.Module):
         #non-local
         out = self.pam0(out)
 
-        out = torch.cat([out, self.sem_gp(gp).expand(n, c//2, h, w)], dim=1)
+        out = torch.cat([out, gp.expand(n, c//2, h, w)], dim=1)
         return out, gp
 
 def get_gsnet8net(dataset='pascal_voc', backbone='resnet50', pretrained=False,
