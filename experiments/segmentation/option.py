@@ -39,7 +39,7 @@ class Options():
         # training hyper params
         parser.add_argument('--aux', action='store_true', default= False,
                             help='Auxilary Loss')
-        parser.add_argument('--aux-weight', type=float, default=0.4,
+        parser.add_argument('--aux-weight', type=float, default=0.2,
                             help='Auxilary loss weight (default: 0.2)')
         parser.add_argument('--se-loss', action='store_true', default= False,
                             help='Semantic Encoding Loss SE-loss')
