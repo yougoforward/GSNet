@@ -44,7 +44,7 @@ class mlgsnetNetHead(nn.Module):
             self.selayer = nn.Linear(inter_channels, out_channels)
 
     def forward(self, c1, c2, c3, c4):
-        feat_sum, gap_feat = self.aa_mlgsnet(torch.cat([c3,c4], dim=1))
+        feat_sum, gap_feat = self.aa_mlgsnet(c1,c2,torch.cat([c3,c4], dim=1))
         outputs = [self.conv8(feat_sum)]
         if self.se_loss:
             outputs.append(self.selayer(torch.squeeze(gap_feat)))
