@@ -144,7 +144,7 @@ class mlgsnet_Module(nn.Module):
         feat2 = self.b2(x)
         feat3 = self.b3(x)
         n, c, h, w = feat0.size()
-        n, c, hl, wl = c1.size()
+        _, _, hl, wl = c1.size()
 
         # psaa
         y1 = torch.cat((x, feat0, feat1, feat2, feat3), 1)
@@ -173,7 +173,7 @@ class mlgsnet_Module(nn.Module):
         #non-local
         out = self.pam0(out)
 
-        out = torch.cat([out, gp.expand(n, c, h, w)], dim=1)
+        out = torch.cat([out, gp.expand(n, c, hl, wl)], dim=1)
         return out, gp
 
 def get_mlgsnetnet(dataset='pascal_voc', backbone='resnet50', pretrained=False,
