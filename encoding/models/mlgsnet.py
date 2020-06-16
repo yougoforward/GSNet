@@ -168,7 +168,7 @@ class mlgsnet_Module(nn.Module):
         skip2 = F.interpolate(skip2, (hl, wl), **self._up_kwargs)
         out = F.interpolate(out, (hl, wl), **self._up_kwargs)
 
-        out = self.loc_conv(torch.cat([skip1, skip2, out]))
+        out = self.loc_conv(torch.cat([skip1, skip2, out], dim=1))
 
         #non-local
         out = self.pam0(out)
