@@ -182,5 +182,5 @@ if __name__ == "__main__":
     for epoch in range(trainer.args.start_epoch, trainer.args.epochs):
         trainer.training(epoch)
         if not trainer.args.no_val:
-            if epoch%20==0 or epoch > trainer.args.epochs*0.9:
+            if epoch%20==0 or epoch > trainer.args.epochs-5:
                 trainer.validation(epoch)
