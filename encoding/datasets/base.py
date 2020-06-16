@@ -97,9 +97,9 @@ class BaseDataset(data.Dataset):
         img = img.crop((x1, y1, x1+crop_size, y1+crop_size))
         mask = mask.crop((x1, y1, x1+crop_size, y1+crop_size))
         # gaussian blur as in PSP
-        # if random.random() < 0.5:
-        #     img = img.filter(ImageFilter.GaussianBlur(
-        #         radius=random.random()))
+        if random.random() < 0.5:
+            img = img.filter(ImageFilter.GaussianBlur(
+                radius=random.random()))
 
         #random hsv
         # img = RandomHSV(img, 10, 10, 10)
