@@ -139,7 +139,6 @@ class mlgsnet_Module(nn.Module):
                       kernel_size=1, stride=1, padding=0, bias=False),
                       norm_layer(out_channels),
                       nn.ReLU(True))   
-        self.gamma = nn.Sequential(nn.Conv2d(in_channels=out_channels, out_channels=1, kernel_size=1, bias=True), nn.Sigmoid())
 
     def forward(self, c1, c2, x):
         feat0 = self.b0(x)
@@ -165,20 +164,14 @@ class mlgsnet_Module(nn.Module):
         se = self.se(gp)
         out = out + se*out
 
-        #non-local
-        nl_feat = self.pam0(out)
-
         #location
         skip1 = self.skip_conv1(c1)
         skip2 = self.skip_conv2(c2)
         skip2 = F.interpolate(skip2, (hl, wl), **self._up_kwargs)
         out = F.interpolate(out, (hl, wl), **self._up_kwargs)
         out = self.loc_conv(torch.cat([skip1, skip2, out], dim=1))
-
-        gamma = self.gamma(out)
-        out = (1-gamma)*F.interpolate(nl_feat, (hl, wl), **self._up_kwargs) + gamma*out
-        #non-local
-        # out = self.pam0(out)
+        # non-local
+        out = self.pam0(out)
 
         out = torch.cat([out, gp.expand(n, c, hl, wl)], dim=1)
         return out, gp
@@ -206,7 +199,7 @@ class PAM_Module(nn.Module):
         self.key_conv = nn.Conv2d(in_channels=in_dim, out_channels=key_dim, kernel_size=1)
         # self.value_conv = nn.Conv2d(in_channels=value_dim, out_channels=value_dim, kernel_size=1)
         # self.gamma = nn.Parameter(torch.zeros(1))
-        # self.gamma = nn.Sequential(nn.Conv2d(in_channels=in_dim, out_channels=1, kernel_size=1, bias=True), nn.Sigmoid())
+        self.gamma = nn.Sequential(nn.Conv2d(in_channels=in_dim, out_channels=1, kernel_size=1, bias=True), nn.Sigmoid())
 
         self.softmax = nn.Softmax(dim=-1)
         # self.fuse_conv = nn.Sequential(nn.Conv2d(value_dim, out_dim, 1, bias=False),
@@ -236,8 +229,8 @@ class PAM_Module(nn.Module):
         # out = F.interpolate(out, (height, width), mode="bilinear", align_corners=True)
 
         # gamma = self.gamma(x)
-        # out = (1-gamma)*out + gamma*x
-        # out = self.fuse_conv(out)
+        out = (1-gamma)*out + gamma*x
+        out = self.fuse_conv(out)
         return out
 
 
@@ -272,7 +265,7 @@ class APAM_Module(nn.Module):
 
         self.query_conv = nn.Conv2d(in_channels=in_dim, out_channels=key_dim, kernel_size=1)
         self.key_conv = nn.Conv1d(in_channels=in_dim, out_channels=key_dim, kernel_size=1)
-        # self.gamma = nn.Sequential(nn.Conv2d(in_channels=in_dim, out_channels=1, kernel_size=1, bias=True), nn.Sigmoid())
+        self.gamma = nn.Sequential(nn.Conv2d(in_channels=in_dim, out_channels=1, kernel_size=1, bias=True), nn.Sigmoid())
 
         self.softmax = nn.Softmax(dim=-1)
 
@@ -296,6 +289,6 @@ class APAM_Module(nn.Module):
         out = torch.bmm(proj_value, attention.permute(0, 2, 1))
         out = out.view(m_batchsize, C, height, width)
 
-        # gamma = self.gamma(x)
-        # out = (1-gamma)*out + gamma*x
+        gamma = self.gamma(x)
+        out = (1-gamma)*out + gamma*x
         return out
