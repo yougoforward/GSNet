@@ -203,29 +203,29 @@ class PSPModule(nn.Module):
 #                                        nn.ReLU(True))
 
 #     def forward(self, x):
-        """
-            inputs :
-                x : input feature maps( B X C X H X W)
-            returns :
-                out : attention value + input feature
-                attention: B X (HxW) X (HxW)
-        """
-        m_batchsize, C, height, width = x.size()
-        proj_query = self.query_conv(x).view(m_batchsize, -1, width*height).permute(0, 2, 1)
-        proj_key = self.psp(self.key_conv(x))
-        energy = torch.bmm(proj_query, proj_key)
+#         """
+#             inputs :
+#                 x : input feature maps( B X C X H X W)
+#             returns :
+#                 out : attention value + input feature
+#                 attention: B X (HxW) X (HxW)
+#         """
+#         m_batchsize, C, height, width = x.size()
+#         proj_query = self.query_conv(x).view(m_batchsize, -1, width*height).permute(0, 2, 1)
+#         proj_key = self.psp(self.key_conv(x))
+#         energy = torch.bmm(proj_query, proj_key)
 
-        energy = (self.key_channels ** -.5) * energy
-        attention = self.softmax(energy)
-        proj_value = self.psp(self.value_conv(x))
+#         energy = (self.key_channels ** -.5) * energy
+#         attention = self.softmax(energy)
+#         proj_value = self.psp(self.value_conv(x))
         
-        out = torch.bmm(proj_value, attention.permute(0, 2, 1))
-        out = out.view(m_batchsize, -1, height, width)
+#         out = torch.bmm(proj_value, attention.permute(0, 2, 1))
+#         out = out.view(m_batchsize, -1, height, width)
         
-        out =self.fuse_conv(out)
-        gamma = self.gamma(x)
-        out = (1-gamma)*out + gamma*x
-        return out
+#         out =self.fuse_conv(out)
+#         gamma = self.gamma(x)
+#         out = (1-gamma)*out + gamma*x
+#         return out
 
 class APAM_Module(nn.Module):
     """ Position attention module"""

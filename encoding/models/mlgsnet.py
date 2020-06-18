@@ -228,9 +228,9 @@ class PAM_Module(nn.Module):
         out = out.view(m_batchsize, C, height, width)
         # out = F.interpolate(out, (height, width), mode="bilinear", align_corners=True)
 
-        # gamma = self.gamma(x)
+        gamma = self.gamma(x)
         out = (1-gamma)*out + gamma*x
-        out = self.fuse_conv(out)
+        # out = self.fuse_conv(out)
         return out
 
 
