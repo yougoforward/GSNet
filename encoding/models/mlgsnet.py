@@ -120,8 +120,8 @@ class mlgsnet_Module(nn.Module):
                             nn.Sigmoid())
 
 
-        # self.pam0 = APAM_Module(in_dim=out_channels, key_dim=out_channels//8,value_dim=out_channels,out_dim=out_channels,norm_layer=norm_layer)
-        self.pam0 = PAM_Module(in_dim=out_channels, key_dim=out_channels//8,value_dim=out_channels,out_dim=out_channels,norm_layer=norm_layer)
+        self.pam0 = APAM_Module(in_dim=out_channels, key_dim=out_channels//2,value_dim=out_channels,out_dim=out_channels, norm_layer=norm_layer)
+        # self.pam0 = PAM_Module(in_dim=out_channels, key_dim=out_channels//8,value_dim=out_channels,out_dim=out_channels,norm_layer=norm_layer)
 
         self.skip_conv1 = nn.Sequential(nn.Conv2d(in_channels=256, out_channels=48,
                       kernel_size=1, stride=1, padding=0, bias=False),
