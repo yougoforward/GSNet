@@ -40,7 +40,7 @@ class up_fcn(BaseNet):
     """
     def __init__(self, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
         super(up_fcn, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
-        self.head = up_fcnHead(2048, nclass, norm_layer)
+        self.head = up_fcnHead(2048, nclass, norm_layer, self._up_kwargs)
         if aux:
             self.auxlayer = up_fcnHead(1024, nclass, norm_layer)
 
@@ -60,7 +60,7 @@ class up_fcn(BaseNet):
 
         
 class up_fcnHead(nn.Module):
-    def __init__(self, in_channels, out_channels, norm_layer):
+    def __init__(self, in_channels, out_channels, norm_layer, up_kwargs):
         super(up_fcnHead, self).__init__()
         inter_channels = in_channels // 4
         self.conv5 = nn.Sequential(nn.Conv2d(in_channels, inter_channels, 3, padding=1, bias=False),
@@ -83,6 +83,7 @@ class up_fcnHead(nn.Module):
                                    nn.ReLU()) 
         self.conv6 = nn.Sequential(nn.Dropout2d(0.1, False),
                                    nn.Conv2d(inter_channels, out_channels, 1))
+        self._up_kwargs = up_kwargs
 
     def forward(self, c1,c2,x):
         n,c,h,w =c1.size()
