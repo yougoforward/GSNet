@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 
 from torch.nn.functional import interpolate
+from .fcn import FCNHead
 
 from .base import BaseNet
 
@@ -42,7 +43,7 @@ class fcn_att(BaseNet):
         super(fcn_att, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
         self.head = fcn_attHead(2048, nclass, norm_layer)
         if aux:
-            self.auxlayer = fcn_attHead(1024, nclass, norm_layer)
+            self.auxlayer = FCNHead(1024, nclass, norm_layer)
 
     def forward(self, x):
         imsize = x.size()[2:]

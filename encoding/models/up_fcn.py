@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 
 from torch.nn.functional import interpolate, unfold
+from .fcn import FCNHead
 
 from .base import BaseNet
 
@@ -42,7 +43,7 @@ class up_fcn(BaseNet):
         super(up_fcn, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
         self.head = up_fcnHead(2048, nclass, norm_layer, self._up_kwargs)
         if aux:
-            self.auxlayer = up_fcnHead(1024, nclass, norm_layer)
+            self.auxlayer = FCNHead(1024, nclass, norm_layer)
 
 
     def forward(self, x):
