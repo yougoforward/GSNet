@@ -45,7 +45,7 @@ class Trainer():
         kwargs = {'num_workers': args.workers, 'pin_memory': True} \
             if args.cuda else {}
         self.trainloader = data.DataLoader(trainset, batch_size=args.batch_size,
-                                           drop_last=True, shuffle=True, **kwargs)
+                                           drop_last=False, shuffle=True, **kwargs)
         self.valloader = data.DataLoader(testset, batch_size=args.batch_size,
                                          drop_last=False, shuffle=False, **kwargs)
         self.nclass = trainset.num_class
