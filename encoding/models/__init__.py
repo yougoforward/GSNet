@@ -42,6 +42,7 @@ from .mlgsnet import *
 from .avg_gsnet import *
 from .annl_gsnet import *
 from .new_gsnet import *
+from .up_fcn import *
 from .annl_fcn import *
 
 def get_segmentation_model(name, **kwargs):
@@ -88,6 +89,7 @@ def get_segmentation_model(name, **kwargs):
         'avg_gsnet': get_avg_gsnetnet,
         'annl_gsnet': get_annl_gsnetnet,
         'new_gsnet': get_new_gsnetnet,
+        'up_fcn': get_up_fcn,
         'annl_fcn': get_annl_fcn,
     }
     return models[name.lower()](**kwargs)

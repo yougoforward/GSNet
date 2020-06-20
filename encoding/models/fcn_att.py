@@ -10,6 +10,7 @@ import torch.nn as nn
 
 from torch.nn.functional import interpolate
 from .fcn import FCNHead
+
 from .base import BaseNet
 
 __all__ = ['fcn_att', 'get_fcn_att', 'get_fcn_att_resnet50_pcontext', 'get_fcn_att_resnet50_ade']
