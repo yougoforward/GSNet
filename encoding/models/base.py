@@ -19,7 +19,7 @@ from ..utils import batch_pix_accuracy, batch_intersection_union
 
 up_kwargs = {'mode': 'bilinear', 'align_corners': True}
 
-__all__ = ['BaseNet', 'MultiEvalModule']
+__all__ = ['BaseNet', 'MultiEvalModule', 'MultiEvalModule_whole']
 
 class BaseNet(nn.Module):
     def __init__(self, nclass, backbone, aux, se_loss, jpu=True, dilated=False, multi_grid=False, stride=8, norm_layer=None,
@@ -133,7 +133,7 @@ class MultiEvalModule_whole(DataParallel):
             score = resize_image(outputs, h, w, **self.module._up_kwargs)
             scores += score
         return scores
-        
+
 class MultiEvalModule(DataParallel):
     """Multi-size Segmentation Eavluator"""
     def __init__(self, module, nclass, device_ids=None, flip=True,
