@@ -16,29 +16,6 @@ from .base import BaseNet
 __all__ = ['up_fcn', 'get_up_fcn', 'get_up_fcn_resnet50_pcontext', 'get_up_fcn_resnet50_ade']
 
 class up_fcn(BaseNet):
-    r"""Fully Convolutional Networks for Semantic Segmentation
-
-    Parameters
-    ----------
-    nclass : int
-        Number of categories for the training dataset.
-    backbone : string
-        Pre-trained dilated backbone network type (default:'resnet50'; 'resnet50',
-        'resnet101' or 'resnet152').
-    norm_layer : object
-        Normalization layer used in backbone network (default: :class:`mxnet.gluon.nn.BatchNorm`;
-
-
-    Reference:
-
-        Long, Jonathan, Evan Shelhamer, and Trevor Darrell. "Fully convolutional networks
-        for semantic segmentation." *CVPR*, 2015
-
-    Examples
-    --------
-    >>> model = up_fcn(nclass=21, backbone='resnet50')
-    >>> print(model)
-    """
     def __init__(self, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
         super(up_fcn, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
         self.head = up_fcnHead(2048, nclass, norm_layer, self._up_kwargs)
@@ -99,7 +76,7 @@ class up_fcnHead(nn.Module):
         out =self.conv5(x)
         out = interpolate(out, (h,w), **self._up_kwargs)
         unfold_out = unfold(out, 3, 2, 2, 1).view(n, 512, 3*3, h*w)
-        out = torch.matmul(unfold_out.permute(0,3,1,2), att.permute(0,1,3,2)).permute(0,2,1,3).view(n,512,h,w)
+        out = torch.matmul(att, unfold_out.permute(0,3,2,1)).permute(0,3,2,1).view(n,512,h,w)
 
         return self.conv6(out)
 
