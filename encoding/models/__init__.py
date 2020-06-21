@@ -44,6 +44,8 @@ from .annl_gsnet import *
 from .new_gsnet import *
 from .up_fcn import *
 from .annl_fcn import *
+from .up_psp import *
+from .up_deeplabv3 import *
 
 def get_segmentation_model(name, **kwargs):
     from .fcn import get_fcn
@@ -91,5 +93,7 @@ def get_segmentation_model(name, **kwargs):
         'new_gsnet': get_new_gsnetnet,
         'up_fcn': get_up_fcn,
         'annl_fcn': get_annl_fcn,
+        'up_psp': get_up_psp,
+        'up_deeplabv3': get_up_deeplabv3,
     }
     return models[name.lower()](**kwargs)
