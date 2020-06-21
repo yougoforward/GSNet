@@ -9,45 +9,44 @@ import torch
 import torch.nn as nn
 
 from torch.nn.functional import interpolate, unfold
-from .fcn import FCNHead
 
 from .base import BaseNet
+from .fcn import FCNHead
+from ..nn import PyramidPooling
 
-__all__ = ['up_fcn', 'get_up_fcn', 'get_up_fcn_resnet50_pcontext', 'get_up_fcn_resnet50_ade']
-
-class up_fcn(BaseNet):
+class up_psp(BaseNet):
     def __init__(self, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
-        super(up_fcn, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
-        self.head = up_fcnHead(2048, nclass, norm_layer, self._up_kwargs)
+        super(up_psp, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
+        self.head = up_pspHead(2048, nclass, norm_layer, self._up_kwargs)
         if aux:
             self.auxlayer = FCNHead(1024, nclass, norm_layer)
 
-
     def forward(self, x):
-        imsize = x.size()[2:]
+        _, _, h, w = x.size()
         c1, c2, c3, c4 = self.base_forward(x)
-        x = self.head(c1,c2,c4)
 
-        x = interpolate(x, imsize, **self._up_kwargs)
-        outputs = [x]
+        outputs = []
+        x = self.head(c1,c2,c4)
+        x = interpolate(x, (h,w), **self._up_kwargs)
+        outputs.append(x)
         if self.aux:
             auxout = self.auxlayer(c3)
-            auxout = interpolate(auxout, imsize, **self._up_kwargs)
+            auxout = interpolate(auxout, (h,w), **self._up_kwargs)
             outputs.append(auxout)
         return tuple(outputs)
 
-        
-class up_fcnHead(nn.Module):
+
+class up_pspHead(nn.Module):
     def __init__(self, in_channels, out_channels, norm_layer, up_kwargs):
-        super(up_fcnHead, self).__init__()
+        super(up_pspHead, self).__init__()
         inter_channels = in_channels // 4
-        self.conv5 = nn.Sequential(nn.Conv2d(in_channels, inter_channels, 3, padding=1, bias=False),
+        self.conv5 = nn.Sequential(PyramidPooling(in_channels, norm_layer, up_kwargs),
+                                   nn.Conv2d(in_channels * 2, inter_channels, 3, padding=1, bias=False),
                                    norm_layer(inter_channels),
-                                   nn.ReLU(),
-                                   )
+                                   nn.ReLU(True))
         self.conv6 = nn.Sequential(nn.Dropout2d(0.1, False),
                                    nn.Conv2d(inter_channels, out_channels, 1))
-
+                                   
         self.refine = nn.Sequential(nn.Conv2d(256, 64, 3, padding=2, dilation=2, bias=False),
                                    norm_layer(64),
                                    nn.ReLU(),
@@ -77,41 +76,24 @@ class up_fcnHead(nn.Module):
         out = out0 + self.gamma*out
         return self.conv6(out)
 
-
-def get_up_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False,
+def get_up_psp(dataset='pascal_voc', backbone='resnet50', pretrained=False,
             root='~/.encoding/models', **kwargs):
-    r"""up_fcn model from the paper `"Fully Convolutional Network for semantic segmentation"
-    <https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_up_fcn.pdf>`_
-    Parameters
-    ----------
-    dataset : str, default pascal_voc
-        The dataset that model pretrained on. (pascal_voc, ade20k)
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.encoding/models'
-        Location for keeping the model parameters.
-    Examples
-    --------
-    >>> model = get_up_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False)
-    >>> print(model)
-    """
     acronyms = {
         'pascal_voc': 'voc',
         'pascal_aug': 'voc',
-        'pcontext': 'pcontext',
         'ade20k': 'ade',
     }
     # infer number of classes
     from ..datasets import datasets
-    model = up_fcn(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
+    model = up_psp(datasets[dataset.lower()].NUM_CLASS, backbone=backbone, root=root, **kwargs)
     if pretrained:
         from .model_store import get_model_file
         model.load_state_dict(torch.load(
-            get_model_file('up_fcn_%s_%s'%(backbone, acronyms[dataset]), root=root)))
+            get_model_file('up_psp_%s_%s'%(backbone, acronyms[dataset]), root=root)))
     return model
 
-def get_up_fcn_resnet50_pcontext(pretrained=False, root='~/.encoding/models', **kwargs):
-    r"""EncNet-PSP model from the paper `"Context Encoding for Semantic Segmentation"
+def get_up_psp_resnet50_ade(pretrained=False, root='~/.encoding/models', **kwargs):
+    r"""up_psp model from the paper `"Context Encoding for Semantic Segmentation"
     <https://arxiv.org/pdf/1803.08904.pdf>`_
 
     Parameters
@@ -124,26 +106,7 @@ def get_up_fcn_resnet50_pcontext(pretrained=False, root='~/.encoding/models', **
 
     Examples
     --------
-    >>> model = get_up_fcn_resnet50_pcontext(pretrained=True)
+    >>> model = get_up_psp_resnet50_ade(pretrained=True)
     >>> print(model)
     """
-    return get_up_fcn('pcontext', 'resnet50', pretrained, root=root, aux=False, **kwargs)
-
-def get_up_fcn_resnet50_ade(pretrained=False, root='~/.encoding/models', **kwargs):
-    r"""EncNet-PSP model from the paper `"Context Encoding for Semantic Segmentation"
-    <https://arxiv.org/pdf/1803.08904.pdf>`_
-
-    Parameters
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.encoding/models'
-        Location for keeping the model parameters.
-
-
-    Examples
-    --------
-    >>> model = get_up_fcn_resnet50_ade(pretrained=True)
-    >>> print(model)
-    """
-    return get_up_fcn('ade20k', 'resnet50', pretrained, root=root, **kwargs)
+    return get_up_psp('ade20k', 'resnet50', pretrained, root=root, **kwargs)
