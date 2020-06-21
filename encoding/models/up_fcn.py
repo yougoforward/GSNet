@@ -62,8 +62,8 @@ class up_fcnHead(nn.Module):
     def forward(self, c1,c2,x):
         n,c,h,w =c1.size()
         c1 = self.refine(c1) # n, 64, h, w
-        c2 = self.refine2(c2)
         up_c2 = interpolate(c2, (h,w), **self._up_kwargs)
+        up_c2 = self.refine2(up_c2)
 
         unfold_up_c2 = unfold(up_c2, 3, 2, 2, 1).view(n, 64, 3*3, h*w)
         # torch.nn.functional.unfold(input, kernel_size, dilation=1, padding=0, stride=1)
