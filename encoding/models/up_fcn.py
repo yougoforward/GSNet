@@ -57,6 +57,9 @@ class up_fcnHead(nn.Module):
         self.refine2 = nn.Sequential(nn.Conv2d(512, 64, 1, padding=0, dilation=1, bias=False),
                                    norm_layer(64),
                                    nn.ReLU()) 
+        self.refine3 = nn.Sequential(nn.Conv2d(512, 64, 1, padding=0, dilation=1, bias=False),
+                                   norm_layer(64),
+                                   nn.ReLU()) 
         self._up_kwargs = up_kwargs
 
     def forward(self, c1,c2,x):
