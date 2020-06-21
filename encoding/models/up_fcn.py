@@ -62,16 +62,16 @@ class up_fcnHead(nn.Module):
     def forward(self, c1,c2,x):
         n,c,h,w =c1.size()
         c1 = self.refine(c1) # n, 64, h, w
-        up_c2 = interpolate(c2, (h,w), **self._up_kwargs)
-        up_c2 = self.refine2(up_c2)
+        c2 = interpolate(c2, (h,w), **self._up_kwargs)
+        c2 = self.refine2(c2)
 
-        unfold_up_c2 = unfold(up_c2, 3, 2, 2, 1).view(n, 64, 3*3, h*w)
+        unfold_up_c2 = unfold(c2, 3, 2, 2, 1).view(n, 64, 3*3, h*w)
         # torch.nn.functional.unfold(input, kernel_size, dilation=1, padding=0, stride=1)
         energy = torch.matmul(c1.view(n, 64, 1, h*w).permute(0,3,2,1), unfold_up_c2.permute(0,3,1,2)) #n,h*w,1,3x3
         att = torch.softmax(energy, dim=-1)
         out =self.conv5(x)
-        out0 = interpolate(out, (h,w), **self._up_kwargs)
-        unfold_out = unfold(out0, 3, 2, 2, 1).view(n, 512, 3*3, h*w)
+        out = interpolate(out, (h,w), **self._up_kwargs)
+        unfold_out = unfold(out, 3, 2, 2, 1).view(n, 512, 3*3, h*w)
         out = torch.matmul(att, unfold_out.permute(0,3,2,1)).permute(0,3,2,1).view(n,512,h,w)
         return self.conv6(out)
 
