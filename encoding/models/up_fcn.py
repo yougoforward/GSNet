@@ -58,7 +58,6 @@ class up_fcnHead(nn.Module):
                                    norm_layer(64),
                                    nn.ReLU()) 
         self._up_kwargs = up_kwargs
-        self.gamma = nn.Parameter(torch.zeros(1))
 
     def forward(self, c1,c2,x):
         n,c,h,w =c1.size()
@@ -74,7 +73,6 @@ class up_fcnHead(nn.Module):
         out0 = interpolate(out, (h,w), **self._up_kwargs)
         unfold_out = unfold(out0, 3, 2, 2, 1).view(n, 512, 3*3, h*w)
         out = torch.matmul(att, unfold_out.permute(0,3,2,1)).permute(0,3,2,1).view(n,512,h,w)
-        out = out0 + self.gamma*out
         return self.conv6(out)
 
 
