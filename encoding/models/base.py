@@ -233,11 +233,7 @@ class MultiEvalModule(DataParallel):
 
         return scores
 
-<<<<<<< HEAD
-class MultiEvalModule(DataParallel):
-=======
 class MultiEvalModule_whole(DataParallel):
->>>>>>> 22aac3827753e94b9a42b2e72f7452a20c499f39
     """Multi-size Segmentation Eavluator"""
     def __init__(self, module, nclass, device_ids=None, flip=True,
                  scales=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75]):
@@ -292,45 +288,16 @@ class MultiEvalModule_whole(DataParallel):
                 short_size = height
             # resize image to current size
             cur_img = resize_image(image, height, width, **self.module._up_kwargs)
-            if long_size <= crop_size:
-                pad_img = pad_image(cur_img, self.module.mean,
-                                    self.module.std, crop_size)
-                outputs = module_inference(self.module, pad_img, self.flip)
-                outputs = crop_image(outputs, 0, height, 0, width)
-            else:
-                if short_size < crop_size:
+
+            if short_size < crop_size:
                     # pad if needed
                     pad_img = pad_image(cur_img, self.module.mean,
                                         self.module.std, crop_size)
-                else:
-                    pad_img = cur_img
-                _,_,ph,pw = pad_img.size()
-                assert(ph >= height and pw >= width)
-                # # grid forward and normalize
-                # h_grids = int(math.ceil(1.0 * (ph-crop_size)/stride)) + 1
-                # w_grids = int(math.ceil(1.0 * (pw-crop_size)/stride)) + 1
-                with torch.cuda.device_of(image):
-                    outputs = image.new().resize_(batch,self.nclass,ph,pw).zero_().cuda()
-                    # count_norm = image.new().resize_(batch,1,ph,pw).zero_().cuda()
-                # # grid evaluation
-                # for idh in range(h_grids):
-                #     for idw in range(w_grids):
-                #         h0 = idh * stride
-                #         w0 = idw * stride
-                #         h1 = min(h0 + crop_size, ph)
-                #         w1 = min(w0 + crop_size, pw)
-                #         crop_img = crop_image(pad_img, h0, h1, w0, w1)
-                #         # pad if needed
-                #         pad_crop_img = pad_image(crop_img, self.module.mean,
-                #                                  self.module.std, crop_size)
-                #         output = module_inference(self.module, pad_crop_img, self.flip)
-                #         outputs[:,:,h0:h1,w0:w1] += crop_image(output,
-                #             0, h1-h0, 0, w1-w0)
-                #         count_norm[:,:,h0:h1,w0:w1] += 1
-                # assert((count_norm==0).sum()==0)
-                # outputs = osutputs / count_norm
-                outputs = module_inference(self.module, pad_img, self.flip)
-                outputs = outputs[:,:,:height,:width]
+            else:
+                pad_img = cur_img
+            _,_,ph,pw = pad_img.size()
+            outputs = module_inference(self.module, pad_img, self.flip)
+            outputs = crop_image(outputs, 0, height, 0, width)
 
             score = resize_image(outputs, h, w, **self.module._up_kwargs)
             scores += score
