@@ -115,7 +115,7 @@ class new_gsnet_Module(nn.Module):
                             nn.Conv2d(in_channels, out_channels, 1, bias=False),
                             norm_layer(out_channels),
                             nn.ReLU(True))
-        self.se = nn.Sequential(
+        self.se = nn.Sequential(nn.AdaptiveAvgPool2d(1),
                             nn.Conv2d(out_channels, out_channels, 1, bias=True),
                             nn.Sigmoid())
 
@@ -141,8 +141,8 @@ class new_gsnet_Module(nn.Module):
         gp = self.gap(x)
         
         # se
-        se = self.se(gp)
-        out = out + se*out
+        se = self.se(out)
+        out = se*out
 
         #non-local
         out = self.pam0(out)
