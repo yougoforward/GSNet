@@ -44,6 +44,7 @@ from .annl_gsnet import *
 from .new_gsnet import *
 from .new_gsnet2 import *
 from .new_gsnet3 import *
+from .new_gsnet4 import *
 
 from .up_fcn import *
 from .annl_fcn import *
@@ -96,6 +97,7 @@ def get_segmentation_model(name, **kwargs):
         'new_gsnet': get_new_gsnetnet,
         'new_gsnet2': get_new_gsnet2net,
         'new_gsnet3': get_new_gsnet3net,
+        'new_gsnet4': get_new_gsnet4net,
 
         'up_fcn': get_up_fcn,
         'annl_fcn': get_annl_fcn,
