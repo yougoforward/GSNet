@@ -12,4 +12,4 @@ python -m experiments.segmentation.test_whole --dataset pcontext \
 #test [multi-scale]
 python -m experiments.segmentation.test_whole --dataset pcontext \
     --model new_gsnet3 --aux --dilated --base-size 520 --crop-size 520 \
-    --backbone resnet101 --resume experiments/segmentation/runs/pcontext/new_gsnet3/new_gsnet3_res101_pcontext/model_best1.pth.tar --split val --mode testval --ms
+    --backbone resnet101 --resume experiments/segmentation/runs/pcontext/new_gsnet3/new_gsnet3_res101_pcontext/model_best.pth.tar --split val --mode testval --ms
