@@ -33,7 +33,7 @@ class new_gsnet4Net(BaseNet):
 
 class new_gsnet4NetHead(nn.Module):
     def __init__(self, in_channels, out_channels, norm_layer, se_loss, jpu=False, up_kwargs=None,
-                 atrous_rates=(6, 12, 24)):
+                 atrous_rates=(10, 20, 30)):
         super(new_gsnet4NetHead, self).__init__()
         self.se_loss = se_loss
         inter_channels = in_channels // 4
