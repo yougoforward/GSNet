@@ -117,23 +117,15 @@ class Trainer():
             train_loss += loss.item()
             tbar.set_description('Train loss: %.3f' % (train_loss / (i + 1)))
 
-        # if self.args.no_val:
-        #     # save checkpoint every epoch
-        #     is_best = False
-        #     utils.save_checkpoint({
-        #         'epoch': epoch + 1,
-        #         'state_dict': self.model.module.state_dict(),
-        #         'optimizer': self.optimizer.state_dict(),
-        #         'best_pred': self.best_pred,
-        #     }, self.args, is_best, filename='checkpoint_{}.pth.tar'.format(epoch))
-        # save checkpoint every epoch
-        is_best = False
-        utils.save_checkpoint({
-            'epoch': epoch + 1,
-            'state_dict': self.model.module.state_dict(),
-            'optimizer': self.optimizer.state_dict(),
-            'best_pred': self.best_pred,
-        }, self.args, is_best, filename='checkpoint_{}.pth.tar'.format(epoch))
+        if self.args.no_val:
+            # save checkpoint every epoch
+            is_best = False
+            utils.save_checkpoint({
+                'epoch': epoch + 1,
+                'state_dict': self.model.module.state_dict(),
+                'optimizer': self.optimizer.state_dict(),
+                'best_pred': self.best_pred,
+            }, self.args, is_best, filename='checkpoint_{}.pth.tar'.format(epoch))
 
 
     def validation(self, epoch):
