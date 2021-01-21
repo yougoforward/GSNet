@@ -50,6 +50,7 @@ from .up_fcn import *
 from .annl_fcn import *
 from .up_psp import *
 from .up_deeplabv3 import *
+from .cfpn_gsf import *
 
 def get_segmentation_model(name, **kwargs):
     from .fcn import get_fcn
@@ -103,5 +104,6 @@ def get_segmentation_model(name, **kwargs):
         'annl_fcn': get_annl_fcn,
         'up_psp': get_up_psp,
         'up_deeplabv3': get_up_deeplabv3,
+        'cfpn_gsf': get_cfpn_gsf,
     }
     return models[name.lower()](**kwargs)
